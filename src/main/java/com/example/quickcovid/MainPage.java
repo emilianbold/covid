@@ -2,11 +2,14 @@ package com.example.quickcovid;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.function.DoubleFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import quicksilver.webapp.simpleui.HtmlPageBootstrap;
+import quicksilver.webapp.simpleui.HtmlStream;
+import quicksilver.webapp.simpleui.HtmlStreamStringBuffer;
 import quicksilver.webapp.simpleui.bootstrap4.charts.TSFigurePanel;
 import quicksilver.webapp.simpleui.bootstrap4.components.BSCard;
 import quicksilver.webapp.simpleui.bootstrap4.components.BSComponentContainer;
@@ -27,6 +30,9 @@ import tech.tablesaw.io.Source;
 import tech.tablesaw.io.csv.CsvReader;
 
 public class MainPage extends HtmlPageBootstrap {
+
+    private LocalDate lastDate;
+    private double maxOngoing;
 
     @Override
     protected BSNavbar createNavbar() {
@@ -75,6 +81,9 @@ public class MainPage extends HtmlPageBootstrap {
             allData.column("Sum [Ongoing]").setName("Ongoing");
             allData.column("Sum [Confirmed]").setName("Confirmed");
             System.out.println(allData.toString());
+
+            lastDate = allData.dateColumn("Last Update").max();
+            maxOngoing = allData.doubleColumn("Ongoing").max();
 
             final Table fallData = allData;
 
@@ -195,6 +204,36 @@ public class MainPage extends HtmlPageBootstrap {
 
         System.out.println("No continent for " + name);
         return "N/A";
+    }
+
+    @Override
+    public void render(HtmlStream stream) {
+        HtmlStreamStringBuffer sb = new HtmlStreamStringBuffer();
+        super.render(sb);
+
+        String text = sb.getText();
+        //take the 1st chart
+        String layoutText = "var layout = {";
+
+        StringBuilder b = new StringBuilder(text);
+
+        b.insert(text.indexOf(layoutText) + layoutText.length(),
+                "\nshapes: [\n"
+                + "    {\n"
+                + "      type: 'line',\n"
+                + "      x0: \"" + lastDate.toString() + "\",\n"
+                + "      y0: 0,\n"
+                + "      x1: \"" + lastDate.toString() + "\",\n"
+                + "      y1: " + maxOngoing + ",\n"
+                + "      line: {\n"
+                + "        color: 'rgb(192,192,192)',\n"
+                + "        width: 1,\n"
+                + "        dash: 'dot',\n"
+                + "      }\n"
+                + "    }\n"
+                + "],\n");
+
+        stream.write(b.toString());
     }
 
     private static DoubleFunction<Double> trend(Table t, String columnName) {
