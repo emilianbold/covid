@@ -94,7 +94,7 @@ public class MainPage extends HtmlPageBootstrap {
                         DoubleFunction<Double> trendOngoing = trend(continentSorted, "Ongoing");
                         double x2 = continentSorted.rowCount() - 1;
 
-                        for (int days = 1; days <= 14; days++) {
+                        for (int days = 1; days <= 7; days++) {
                             double x3 = x2 + days;
 
                             double nextOngoing = trendOngoing.apply(x3);
