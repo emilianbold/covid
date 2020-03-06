@@ -14,9 +14,7 @@ import quicksilver.webapp.simpleui.bootstrap4.components.BSNavbar;
 import quicksilver.webapp.simpleui.bootstrap4.components.BSPanel;
 import tech.tablesaw.aggregate.AggregateFunctions;
 import tech.tablesaw.api.DoubleColumn;
-import tech.tablesaw.api.IntColumn;
 import tech.tablesaw.api.Row;
-import tech.tablesaw.api.StringColumn;
 import tech.tablesaw.api.Table;
 import tech.tablesaw.charts.ChartBuilder;
 
@@ -40,24 +38,7 @@ public class MainPage extends HtmlPageBootstrap {
         p.add(new BSHeading("Charts", 1));
 
         {
-            Table allData = DailyReportsReader.rawData();
-
-            StringColumn continent = allData.stringColumn("Country/Region")
-                    .map(MainPage::continentOf, n -> StringColumn.create("Continent"));
-
-            allData = allData.addColumns(continent);
-
-            IntColumn confirmed = allData.intColumn("Confirmed");
-            IntColumn deaths = allData.intColumn("Deaths");
-            IntColumn recovered = allData.intColumn("Recovered");
-            IntColumn ongoing = IntColumn.create("Ongoing", confirmed.size());
-            for (int i = 0; i < confirmed.size(); i++) {
-                int d = deaths.isMissing(i) ? 0 : deaths.get(i);
-                int r = recovered.isMissing(i) ? 0 : recovered.get(i);
-                ongoing.set(i, confirmed.get(i) - d - r);
-//                System.out.println(i + " -> " + ongoing.get(i));
-            }
-            allData.addColumns(ongoing);
+            Table allData = DailyReportsReader.allData();
 
             allData = allData.summarize("Ongoing", "Confirmed", AggregateFunctions.sum)
                     .by("Country/Region", "Last Update", "Continent");
@@ -125,50 +106,6 @@ public class MainPage extends HtmlPageBootstrap {
         }
 
         return p;
-    }
-
-    static String continentOf(String name) {
-        //keep separate
-        if ("Mainland China".equals(name)) {
-            return "China";
-        }
-        if ("Others".equals(name)) {
-            return "Others";
-        }
-        if ("Japan".equals(name)) {
-            return "Japan";
-        }
-
-        //ugly way to encode all the countries
-        String europe = "/Gibraltar/Faroe Islands/Bosnia and Herzegovina/Liechtenstein/Portugal/Poland/Slovenia/Hungary/Ukraine/Andorra/Latvia/San Marino/North Ireland/Lithuania/Belarus/Iceland/Czech Republic/Netherlands/Italy/France/Germany/Spain/UK/Denmark/Finland/Ireland/Estonia/Monaco/Luxembourg/Croatia/Greece/Romania/Switzerland/Austria/Sweden/Belgium/North Macedonia/Norway/";
-        if (europe.contains("/" + name + "/")) {
-            return "Europe";
-        }
-        String nAmerica = "/US/Canada/Mexico/Dominican Republic/Saint Barthelemy/";
-        if (nAmerica.contains("/" + name + "/")) {
-            return "North America";
-        }
-        String sAmerica = "/Chile/Argentina/Brazil/Ecuador/Colombia/";
-        if (sAmerica.contains("/" + name + "/")) {
-            return "South America";
-        }
-        String asia = "/Palestine/Jordan/Indonesia/Armenia/Saudi Arabia/Qatar/Georgia/Azerbaijan/Macau/Sri Lanka/Kuwait/Nepal/Cambodia/South Korea/Singapore/Hong Kong/Iran/Iraq/Thailand/Bahrain/Taiwan/Kuwait/Malaysia/Vietnam/United Arab Emirates/Oman/India/Philippines/Israel/Lebanon/Pakistan/Russia/Afghanistan/";
-        if (asia.contains("/" + name + "/")) {
-            return "Asia";
-        }
-
-        String africa = "/South Africa/Tunisia/Senegal/Morocco/Algeria/Egypt/Nigeria/Ivory Coast/";
-        if (africa.contains("/" + name + "/")) {
-            return "Africa";
-        }
-
-        String oceania = "/Australia/New Zealand/";
-        if (oceania.contains("/" + name + "/")) {
-            return "Australia/Oceania";
-        }
-
-        System.out.println("No continent for " + name);
-        return "N/A";
     }
 
     @Override
