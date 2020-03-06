@@ -20,8 +20,53 @@ import tech.tablesaw.charts.ChartBuilder;
 
 public class MainPage extends HtmlPageBootstrap {
 
-    private LocalDate lastDate;
-    private double maxOngoing;
+    private Table allData;
+    private final LocalDate lastDate;
+    private final double maxOngoing;
+
+    public MainPage() {
+        allData = DailyReportsReader.allData();
+
+        allData = allData.summarize("Ongoing", "Confirmed", AggregateFunctions.sum)
+                .by("Country/Region", "Last Update", "Continent");
+
+        allData.column("Sum [Ongoing]").setName("Ongoing");
+        allData.column("Sum [Confirmed]").setName("Confirmed");
+
+        System.out.println(allData.toString());
+
+        allData = allData.summarize("Ongoing", "Confirmed", AggregateFunctions.sum)
+                .by("Last Update", "Continent");
+        allData.column("Sum [Ongoing]").setName("Ongoing");
+        allData.column("Sum [Confirmed]").setName("Confirmed");
+        System.out.println(allData.toString());
+
+        lastDate = allData.dateColumn("Last Update").max();
+        maxOngoing = allData.doubleColumn("Ongoing").max();
+
+        final Table fallData = allData;
+
+        allData.splitOn("Continent")
+                .asTableList()
+                .forEach((Table t) -> {
+                    Table continentSorted = t.sortDescendingOn("Last Update");
+                    DoubleFunction<Double> trendOngoing = trend(continentSorted, "Ongoing");
+                    double x2 = continentSorted.rowCount() - 1;
+
+                    for (int days = 1; days <= 7; days++) {
+                        double x3 = x2 + days;
+
+                        double nextOngoing = trendOngoing.apply(x3);
+
+                        Row row = fallData.appendRow();
+                        row.setString("Continent", continentSorted.getString(0, "Continent"));
+                        row.setDate("Last Update", continentSorted.dateColumn("Last Update").get(0).plusDays(days));
+                        if (nextOngoing >= 0) {
+                            row.setDouble("Ongoing", nextOngoing);
+                        }
+                    }
+                });
+    }
 
     @Override
     protected BSNavbar createNavbar() {
@@ -38,48 +83,6 @@ public class MainPage extends HtmlPageBootstrap {
         p.add(new BSHeading("Charts", 1));
 
         {
-            Table allData = DailyReportsReader.allData();
-
-            allData = allData.summarize("Ongoing", "Confirmed", AggregateFunctions.sum)
-                    .by("Country/Region", "Last Update", "Continent");
-
-            allData.column("Sum [Ongoing]").setName("Ongoing");
-            allData.column("Sum [Confirmed]").setName("Confirmed");
-
-            System.out.println(allData.toString());
-
-            allData = allData.summarize("Ongoing", "Confirmed", AggregateFunctions.sum)
-                    .by("Last Update", "Continent");
-            allData.column("Sum [Ongoing]").setName("Ongoing");
-            allData.column("Sum [Confirmed]").setName("Confirmed");
-            System.out.println(allData.toString());
-
-            lastDate = allData.dateColumn("Last Update").max();
-            maxOngoing = allData.doubleColumn("Ongoing").max();
-
-            final Table fallData = allData;
-
-            allData.splitOn("Continent")
-                    .asTableList()
-                    .forEach((Table t) -> {
-                        Table continentSorted = t.sortDescendingOn("Last Update");
-                        DoubleFunction<Double> trendOngoing = trend(continentSorted, "Ongoing");
-                        double x2 = continentSorted.rowCount() - 1;
-
-                        for (int days = 1; days <= 7; days++) {
-                            double x3 = x2 + days;
-
-                            double nextOngoing = trendOngoing.apply(x3);
-
-                            Row row = fallData.appendRow();
-                            row.setString("Continent", continentSorted.getString(0, "Continent"));
-                            row.setDate("Last Update", continentSorted.dateColumn("Last Update").get(0).plusDays(days));
-                            if (nextOngoing >= 0) {
-                                row.setDouble("Ongoing", nextOngoing);
-                            }
-                        }
-                    });
-
             ChartBuilder chartBuilder = ChartBuilder.createBuilder()
                     .dataTable(allData)
                     .chartType(ChartBuilder.CHART_TYPE.TIMESERIES)
