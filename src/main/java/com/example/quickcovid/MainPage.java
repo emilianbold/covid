@@ -21,6 +21,7 @@ import tech.tablesaw.aggregate.AggregateFunctions;
 import tech.tablesaw.api.ColumnType;
 import tech.tablesaw.api.DateColumn;
 import tech.tablesaw.api.DateTimeColumn;
+import tech.tablesaw.api.DoubleColumn;
 import tech.tablesaw.api.IntColumn;
 import tech.tablesaw.api.Row;
 import tech.tablesaw.api.StringColumn;
@@ -237,10 +238,18 @@ public class MainPage extends HtmlPageBootstrap {
     }
 
     private static DoubleFunction<Double> trend(Table t, String columnName) {
-        double y2 = t.doubleColumn(columnName).get(0);
-        double x2 = t.doubleColumn(columnName).size() - 1;
+        DoubleColumn values = t.doubleColumn(columnName);
+        double y2 = values.get(0);
+        double x2 = values.size() - 1;
 
-        double y1 = t.doubleColumn(columnName).get(1);
+        double y1;
+
+        if (x2 == 0) {
+            //for 1st value assume a start at 0
+            y1 = 0;
+        } else {
+            y1 = values.get(1);
+        }
         double x1 = x2 - 1;
 
         double slope = (y1 - y2) / (x1 - x2);
