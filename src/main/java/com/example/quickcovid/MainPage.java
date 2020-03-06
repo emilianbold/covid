@@ -175,24 +175,24 @@ public class MainPage extends HtmlPageBootstrap {
         }
 
         //ugly way to encode all the countries
-        String europe = "/San Marino/North Ireland/Lithuania/Belarus/Iceland/Czech Republic/Netherlands/Italy/France/Germany/Spain/UK/Denmark/Finland/Ireland/Estonia/Monaco/Luxembourg/Croatia/Greece/Romania/Switzerland/Austria/Sweden/Belgium/North Macedonia/Norway/";
+        String europe = "/Gibraltar/Faroe Islands/Bosnia and Herzegovina/Liechtenstein/Portugal/Poland/Slovenia/Hungary/Ukraine/Andorra/Latvia/San Marino/North Ireland/Lithuania/Belarus/Iceland/Czech Republic/Netherlands/Italy/France/Germany/Spain/UK/Denmark/Finland/Ireland/Estonia/Monaco/Luxembourg/Croatia/Greece/Romania/Switzerland/Austria/Sweden/Belgium/North Macedonia/Norway/";
         if (europe.contains("/" + name + "/")) {
             return "Europe";
         }
-        String nAmerica = "/US/Canada/Mexico/Dominican Republic/";
+        String nAmerica = "/US/Canada/Mexico/Dominican Republic/Saint Barthelemy/";
         if (nAmerica.contains("/" + name + "/")) {
             return "North America";
         }
-        String sAmerica = "/Brazil/Ecuador/";
+        String sAmerica = "/Chile/Argentina/Brazil/Ecuador/Colombia/";
         if (sAmerica.contains("/" + name + "/")) {
             return "South America";
         }
-        String asia = "/Qatar/Georgia/Azerbaijan/Macau/Sri Lanka/Kuwait/Nepal/Cambodia/South Korea/Singapore/Hong Kong/Iran/Iraq/Thailand/Bahrain/Taiwan/Kuwait/Malaysia/Vietnam/United Arab Emirates/Oman/India/Philippines/Israel/Lebanon/Pakistan/Russia/Afghanistan/";
+        String asia = "/Palestine/Jordan/Indonesia/Armenia/Saudi Arabia/Qatar/Georgia/Azerbaijan/Macau/Sri Lanka/Kuwait/Nepal/Cambodia/South Korea/Singapore/Hong Kong/Iran/Iraq/Thailand/Bahrain/Taiwan/Kuwait/Malaysia/Vietnam/United Arab Emirates/Oman/India/Philippines/Israel/Lebanon/Pakistan/Russia/Afghanistan/";
         if (asia.contains("/" + name + "/")) {
             return "Asia";
         }
 
-        String africa = "/Algeria/Egypt/Nigeria/Ivory Coast/";
+        String africa = "/South Africa/Tunisia/Senegal/Morocco/Algeria/Egypt/Nigeria/Ivory Coast/";
         if (africa.contains("/" + name + "/")) {
             return "Africa";
         }
