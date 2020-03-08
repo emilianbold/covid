@@ -15,15 +15,15 @@ public class Country {
         }
 
         //ugly way to encode all the countries
-        String europe = "/Serbia/Slovakia/Vatican City/Gibraltar/Faroe Islands/Bosnia and Herzegovina/Liechtenstein/Portugal/Poland/Slovenia/Hungary/Ukraine/Andorra/Latvia/San Marino/North Ireland/Lithuania/Belarus/Iceland/Czech Republic/Netherlands/Italy/France/Germany/Spain/UK/Denmark/Finland/Ireland/Estonia/Monaco/Luxembourg/Croatia/Greece/Romania/Switzerland/Austria/Sweden/Belgium/North Macedonia/Norway/";
+        String europe = "/Malta/Serbia/Slovakia/Vatican City/Gibraltar/Faroe Islands/Bosnia and Herzegovina/Liechtenstein/Portugal/Poland/Slovenia/Hungary/Ukraine/Andorra/Latvia/San Marino/North Ireland/Lithuania/Belarus/Iceland/Czech Republic/Netherlands/Italy/France/Germany/Spain/UK/Denmark/Finland/Ireland/Estonia/Monaco/Luxembourg/Croatia/Greece/Romania/Switzerland/Austria/Sweden/Belgium/North Macedonia/Norway/";
         if (europe.contains("/" + name + "/")) {
             return "Europe";
         }
-        String nAmerica = "/US/Canada/Mexico/Dominican Republic/Saint Barthelemy/Costa Rica/";
+        String nAmerica = "/US/Canada/Mexico/Dominican Republic/Saint Barthelemy/Costa Rica/Martinique/";
         if (nAmerica.contains("/" + name + "/")) {
             return "North America";
         }
-        String sAmerica = "/Peru/Chile/Argentina/Brazil/Ecuador/Colombia/";
+        String sAmerica = "/Peru/Chile/Argentina/Brazil/Ecuador/Colombia/French Guiana/";
         if (sAmerica.contains("/" + name + "/")) {
             return "South America";
         }
