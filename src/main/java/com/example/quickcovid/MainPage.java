@@ -1,7 +1,10 @@
 package com.example.quickcovid;
 
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.function.DoubleFunction;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.tuple.Pair;
 import quicksilver.webapp.simpleui.HtmlPageBootstrap;
 import quicksilver.webapp.simpleui.HtmlStream;
 import quicksilver.webapp.simpleui.HtmlStreamStringBuffer;
@@ -21,10 +24,75 @@ import tech.tablesaw.charts.ChartBuilder;
 public class MainPage extends HtmlPageBootstrap {
 
     private Table allData;
+    private Table europeData;
     private final LocalDate lastDate;
     private final double maxOngoing;
 
     public MainPage() {
+        europeData = DailyReportsReader.allData();
+        europeData = europeData.splitOn("Continent").asTableList().stream()
+                .filter(t -> t.getString(0, "Continent").equals("Europe"))
+                .findFirst().get();
+
+        europeData = europeData.summarize("Ongoing", "Confirmed", AggregateFunctions.sum)
+                .by("Country/Region", "Last Update", "Continent");
+
+        europeData.column("Sum [Ongoing]").setName("Ongoing");
+        europeData.column("Sum [Confirmed]").setName("Confirmed");
+
+        {
+            //for each country find the latest number, match it with a previous date on Italy,
+            //shift the date and change the country (aka legend label) name
+
+            //1. for each country find the latest number
+            Map<String, Double> maxCountry = europeData.splitOn("Country/Region").asTableList().stream()
+                    .map(t -> Pair.of(
+                    t.getString(0, "Country/Region"),
+                    t.doubleColumn("Ongoing").max()))
+                    .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+            Map<String, LocalDate> latestCountry = europeData.splitOn("Country/Region").asTableList().stream()
+                    .map(t -> Pair.of(
+                    t.getString(0, "Country/Region"),
+                    t.dateColumn("Last Update").max()))
+                    .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+            //get italy
+            final Table italy = europeData.splitOn("Country/Region").asTableList().stream()
+                    .filter(t -> t.getString(0, "Country/Region").equals("Italy"))
+                    .findAny().get()
+                    .sortDescendingOn("Ongoing");
+
+            //2.match it with a previous date on Italy
+            Map<String, Integer> delayCountry = maxCountry.entrySet().stream()
+                    .map(e -> {
+                        String country = e.getKey();
+                        Double max = e.getValue();
+
+                        int delay = 0;
+                        DoubleColumn italyOngoing = italy.doubleColumn("Ongoing");
+
+                        while (delay < italy.rowCount()) {
+                            double itOngoing = italyOngoing.getDouble(delay);
+                            if (itOngoing <= max) {
+                                break;
+                            }
+                            delay++;
+                        }
+
+                        return Pair.of(country, delay);
+                    })
+                    .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+            //3.shift country by delay days
+            europeData.forEach((row) -> {
+                String country = row.getString("Country/Region");
+                int delay = delayCountry.get(country);
+                if (delay > 0) {
+                    LocalDate delayedDate = row.getDate("Last Update").minusDays(delay);
+                    row.setDate("Last Update", delayedDate);
+                    row.setString("Country/Region", country + "(-" + delay + ")");
+                }
+            });
+        }
+
         allData = DailyReportsReader.allData();
 
         allData = allData.summarize("Ongoing", "Confirmed", AggregateFunctions.sum)
@@ -95,6 +163,22 @@ public class MainPage extends HtmlPageBootstrap {
 //                    .height(500);
             p.add(new BSCard(new TSFigurePanel(chartBuilder.divName("Ongoing").build(), "Ongoing"),
                     "Ongoing"));
+        }
+        {
+            ChartBuilder chartBuilder = ChartBuilder.createBuilder()
+                    .dataTable(europeData)
+                    .chartType(ChartBuilder.CHART_TYPE.TIMESERIES)
+                    .columnsForViewColumns("Last Update")
+                    .columnsForViewRows("Ongoing")
+                    .columnForColor("Country/Region");
+
+            chartBuilder.getLayoutBuilder()
+                    .autosize(true);
+
+            p.add(new BSCard(new TSFigurePanel(chartBuilder.divName("EuropeDaysBehind").build(), "EuropeDaysBehind"),
+                    "Europe: Days behind Italy"));
+        }
+        {
 
             ChartBuilder chartBuilder2 = ChartBuilder.createBuilder()
                     .dataTable(allData)
