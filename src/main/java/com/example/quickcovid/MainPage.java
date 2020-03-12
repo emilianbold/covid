@@ -31,8 +31,14 @@ public class MainPage extends HtmlPageBootstrap {
     public MainPage() {
         europeData = DailyReportsReader.allData();
         europeData = europeData.splitOn("Continent").asTableList().stream()
-                .filter(t -> t.getString(0, "Continent").equals("Europe"))
-                .findFirst().get();
+                .filter(t -> t.getString(0, "Continent").equals("Europe") || t.getString(0, "Continent").equals("North America"))
+                .reduce(Table::append)
+                .get();
+
+        europeData = europeData.splitOn("Country/Region").asTableList().stream()
+                .filter(t -> t.getString(0, "Country/Region").equals("US") || t.getString(0, "Continent").equals("Europe"))
+                .reduce(Table::append)
+                .get();
 
         europeData = europeData.summarize("Ongoing", "Confirmed", AggregateFunctions.sum)
                 .by("Country/Region", "Last Update", "Continent");
@@ -81,6 +87,16 @@ public class MainPage extends HtmlPageBootstrap {
                         return Pair.of(country, delay);
                     })
                     .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+
+            //remove countries more than 14 days away to make the chart more readable
+            europeData = europeData.splitOn("Country/Region").asTableList().stream()
+                    .filter(t -> {
+                        String country = t.getString(0, "Country/Region");
+                        return country.equals("Romania") || delayCountry.get(country) <= 14;
+                    })
+                    .reduce(Table::append)
+                    .get();
+
             //3.shift country by delay days
             europeData.forEach((row) -> {
                 String country = row.getString("Country/Region");
@@ -176,7 +192,7 @@ public class MainPage extends HtmlPageBootstrap {
                     .autosize(true);
 
             p.add(new BSCard(new TSFigurePanel(chartBuilder.divName("EuropeDaysBehind").build(), "EuropeDaysBehind"),
-                    "Europe: Days behind Italy"));
+                    "Days behind Italy"));
         }
         {
 
