@@ -1,6 +1,7 @@
 package com.example.quickcovid;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.function.DoubleFunction;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ import quicksilver.webapp.simpleui.bootstrap4.components.BSNavItem;
 import quicksilver.webapp.simpleui.bootstrap4.components.BSNavbar;
 import quicksilver.webapp.simpleui.bootstrap4.components.BSPanel;
 import tech.tablesaw.aggregate.AggregateFunctions;
+import tech.tablesaw.api.DateColumn;
 import tech.tablesaw.api.DoubleColumn;
 import tech.tablesaw.api.Row;
 import tech.tablesaw.api.Table;
@@ -134,7 +136,7 @@ public class MainPage extends HtmlPageBootstrap {
                 .asTableList()
                 .forEach((Table t) -> {
                     Table continentSorted = t.sortDescendingOn("Last Update");
-                    DoubleFunction<Double> trendOngoing = trend(continentSorted, "Ongoing");
+                    DoubleFunction<Double> trendOngoing = trend(continentSorted, "Ongoing", "Last Update");
                     double x2 = continentSorted.rowCount() - 1;
 
                     for (int days = 1; days <= 7; days++) {
@@ -241,20 +243,27 @@ public class MainPage extends HtmlPageBootstrap {
         stream.write(b.toString());
     }
 
-    private static DoubleFunction<Double> trend(Table t, String columnName) {
+    private static DoubleFunction<Double> trend(Table t, String columnName, String dateName) {
         DoubleColumn values = t.doubleColumn(columnName);
         double y2 = values.get(0);
         double x2 = values.size() - 1;
 
         double y1;
 
+        final int xStep;
+
         if (x2 == 0) {
             //for 1st value assume a start at 0
             y1 = 0;
+            xStep = 1;
         } else {
             y1 = values.get(1);
+            DateColumn dates = t.dateColumn(dateName);
+            LocalDate today = dates.get(0);
+            LocalDate prev = dates.get(1);
+            xStep = (int) ChronoUnit.DAYS.between(prev, today);
         }
-        double x1 = x2 - 1;
+        double x1 = x2 - xStep;
 
         double slope = (y1 - y2) / (x1 - x2);
 
