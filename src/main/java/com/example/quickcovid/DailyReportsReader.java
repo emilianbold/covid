@@ -2,6 +2,7 @@ package com.example.quickcovid;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -9,6 +10,7 @@ import tech.tablesaw.api.ColumnType;
 import tech.tablesaw.api.DateColumn;
 import tech.tablesaw.api.DateTimeColumn;
 import tech.tablesaw.api.IntColumn;
+import tech.tablesaw.api.Row;
 import tech.tablesaw.api.StringColumn;
 import tech.tablesaw.api.Table;
 import tech.tablesaw.io.Source;
@@ -34,6 +36,47 @@ public class DailyReportsReader {
 //                System.out.println(i + " -> " + ongoing.get(i));
         }
         allData.addColumns(ongoing);
+
+        Table duplicateCompensate = allData.copy();
+        duplicateCompensate.clear();
+
+        allData.splitOn("Province/State", "Country/Region", "Last Update").asTableList()
+                .forEach(t -> {
+                    if (t.rowCount() > 1) {
+//                        System.out.println("Duplicate data for " + t.getString(0, "Province/State") + " " + t.getString(0, "Country/Region") + " " + t.getString(0, "Last Update") + " ");
+                        //Confirmed,Deaths,Recovered,Ongoing
+                        int Confirmed = t.intColumn("Confirmed").get(0),
+                                Deaths = t.intColumn("Deaths").get(0),
+                                Recovered = t.intColumn("Recovered").get(0),
+                                Ongoing = t.intColumn("Ongoing").get(0);
+                        int totalDuplicates = t.rowCount();
+                        t.forEach(row -> {
+                            int Confirmed2 = row.getInt("Confirmed"),
+                                    Deaths2 = row.getInt("Deaths"),
+                                    Recovered2 = row.getInt("Recovered"),
+                                    Ongoing2 = row.getInt("Ongoing");
+                            if (Confirmed2 != Confirmed || Deaths2 != Deaths || Recovered2 != Recovered || Ongoing2 != Ongoing) {
+                                System.out.println("Inconsistent " + Ongoing2 + " vs " + Ongoing);
+                            }
+                        });
+
+                        //compensate for duplicates by adding negative values
+                        Row c = t.appendRow();
+                        c.setString("Province/State", t.getString(0, "Province/State"));
+                        c.setString("Country/Region", t.getString(0, "Country/Region"));
+                        c.setDate("Last Update", t.dateColumn("Last Update").get(0));
+                        //Confirmed,Deaths,Recovered,Ongoing
+                        c.setInt("Confirmed", -(totalDuplicates - 1) * Confirmed);
+                        c.setInt("Deaths", -(totalDuplicates - 1) * Deaths);
+                        c.setInt("Recovered", -(totalDuplicates - 1) * Recovered);
+                        c.setInt("Ongoing", -(totalDuplicates - 1) * Ongoing);
+                    }
+                });
+
+        allData = allData.append(duplicateCompensate);
+
+        //remove incomplete data on March 11th, 12th and 13th
+        allData = allData.dropWhere(allData.dateColumn("Last Update").isBetweenIncluding(LocalDate.of(2020, 3, 11), LocalDate.of(2020, 3, 13)));
 
         return allData;
     }

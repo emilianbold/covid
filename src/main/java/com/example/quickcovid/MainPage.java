@@ -63,6 +63,8 @@ public class MainPage extends HtmlPageBootstrap {
                     t.getString(0, "Country/Region"),
                     t.dateColumn("Last Update").max()))
                     .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+            LocalDate latestItaly = latestCountry.get("Italy");
+
             //get italy
             final Table italy = europeData.splitOn("Country/Region").asTableList().stream()
                     .filter(t -> t.getString(0, "Country/Region").equals("Italy"))
@@ -70,23 +72,26 @@ public class MainPage extends HtmlPageBootstrap {
                     .sortDescendingOn("Ongoing");
 
             //2.match it with a previous date on Italy
-            Map<String, Integer> delayCountry = maxCountry.entrySet().stream()
+            Map<String, LocalDate> delayCountry = maxCountry.entrySet().stream()
                     .map(e -> {
                         String country = e.getKey();
                         Double max = e.getValue();
 
                         int delay = 0;
                         DoubleColumn italyOngoing = italy.doubleColumn("Ongoing");
+                        DateColumn italyLastUpdate = italy.dateColumn("Last Update");
+                        LocalDate italyMatchDate = italyLastUpdate.get(0);
 
                         while (delay < italy.rowCount()) {
                             double itOngoing = italyOngoing.getDouble(delay);
+                            italyMatchDate = italyLastUpdate.get(delay);
                             if (itOngoing <= max) {
                                 break;
                             }
                             delay++;
                         }
 
-                        return Pair.of(country, delay);
+                        return Pair.of(country, italyMatchDate);
                     })
                     .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
 
@@ -94,7 +99,7 @@ public class MainPage extends HtmlPageBootstrap {
             europeData = europeData.splitOn("Country/Region").asTableList().stream()
                     .filter(t -> {
                         String country = t.getString(0, "Country/Region");
-                        return country.equals("Romania") || delayCountry.get(country) <= 14;
+                        return country.equals("Romania") || ChronoUnit.DAYS.between(delayCountry.get(country), latestItaly)  <= 14;
                     })
                     .reduce(Table::append)
                     .get();
@@ -102,7 +107,7 @@ public class MainPage extends HtmlPageBootstrap {
             //3.shift country by delay days
             europeData.forEach((row) -> {
                 String country = row.getString("Country/Region");
-                int delay = delayCountry.get(country);
+                long delay = ChronoUnit.DAYS.between(delayCountry.get(country), latestItaly);
                 if (delay > 0) {
                     LocalDate delayedDate = row.getDate("Last Update").minusDays(delay);
                     row.setDate("Last Update", delayedDate);
@@ -128,7 +133,6 @@ public class MainPage extends HtmlPageBootstrap {
         System.out.println(allData.toString());
 
         lastDate = allData.dateColumn("Last Update").max();
-        maxOngoing = allData.doubleColumn("Ongoing").max();
 
         final Table fallData = allData;
 
@@ -152,6 +156,8 @@ public class MainPage extends HtmlPageBootstrap {
                         }
                     }
                 });
+        //include estimated values for max ongoing
+        maxOngoing = allData.doubleColumn("Ongoing").max();
     }
 
     @Override
