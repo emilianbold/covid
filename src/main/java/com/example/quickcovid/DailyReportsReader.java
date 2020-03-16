@@ -37,6 +37,9 @@ public class DailyReportsReader {
         }
         allData.addColumns(ongoing);
 
+        //remove incomplete data on March 11th, 12th and 13th
+        allData = allData.dropWhere(allData.dateColumn("Last Update").isBetweenIncluding(LocalDate.of(2020, 3, 11), LocalDate.of(2020, 3, 13)));
+
         Table duplicateCompensate = allData.copy();
         duplicateCompensate.clear();
 
@@ -74,9 +77,6 @@ public class DailyReportsReader {
                 });
 
         allData = allData.append(duplicateCompensate);
-
-        //remove incomplete data on March 11th, 12th and 13th
-        allData = allData.dropWhere(allData.dateColumn("Last Update").isBetweenIncluding(LocalDate.of(2020, 3, 11), LocalDate.of(2020, 3, 13)));
 
         return allData;
     }
