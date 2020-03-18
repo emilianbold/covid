@@ -116,7 +116,9 @@ public class MainPage extends HtmlPageBootstrap {
             });
         }
 
-        allData = DailyReportsReader.allData();
+        allData = DailyReportsReader.allData(true);
+        //remove incomplete data on March 11th, 12th and 13th
+        allData = allData.dropWhere(allData.dateColumn("Last Update").isBetweenIncluding(LocalDate.of(2020, 3, 11), LocalDate.of(2020, 3, 15)));
 
         allData = allData.summarize("Ongoing", "Confirmed", AggregateFunctions.sum)
                 .by("Country/Region", "Last Update", "Continent");
