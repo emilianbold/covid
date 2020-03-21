@@ -167,6 +167,7 @@ public class MainPage extends HtmlPageBootstrap {
         BSNavbar bar = super.createNavbar();
 
         bar.add(new BSNavItem("COVID", "/"));
+        bar.add(new BSNavItem("Source on <i class=\"fab fa-github\"></i> GitHub", "https://github.com/emilianbold/covid/"));
         return bar;
     }
 
