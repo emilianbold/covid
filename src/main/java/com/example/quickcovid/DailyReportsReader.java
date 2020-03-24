@@ -191,11 +191,23 @@ public class DailyReportsReader {
                 .map(f -> {
                     try {
                         Table t = new CsvReader().read(new Source(f));
+
+                        if (t.columnNames().contains("FIPS")) {
+                            //new format:
+                            //-Province/State,Country/Region,Last Update,Confirmed,Deaths,Recovered,Latitude,Longitude
+                            //+FIPS,Admin2,Province_State,Country_Region,Last_Update,Lat,Long_,Confirmed,Deaths,Recovered,Active,Combined_Key
+                            /* t.replaceColumn("Province_State",*/ t.column("Province_State").setName("Province/State");
+                            /* t.replaceColumn("Country_Region",*/ t.column("Country_Region").setName("Country/Region");
+                            /* t.replaceColumn("Last_Update",*/ t.column("Last_Update").setName("Last Update");
+                            /* t.replaceColumn("Lat",*/ t.column("Lat").setName("Latitude");
+                            /* t.replaceColumn("Long_",*/ t.column("Long_").setName("Longitude");
+                        }
+
                         if (t.column("Last Update").type() != ColumnType.LOCAL_DATE_TIME) {
                             Logger.getLogger(MainPage.class.getName()).log(Level.WARNING, "Bad timestamp for " + f);
                             return null;
                         } else {
-                            //remove time from date time
+                           //remove time from date time
                             DateTimeColumn update = t.dateTimeColumn("Last Update");
                             DateColumn date = update.map(d -> d.toLocalDate(), DateColumn::create);
                             t.replaceColumn("Last Update", date);
