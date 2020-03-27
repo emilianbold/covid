@@ -75,19 +75,35 @@ public class MainPage extends HtmlPageBootstrap {
             Map<String, LocalDate> delayCountry = maxCountry.entrySet().stream()
                     .map(e -> {
                         String country = e.getKey();
-                        Double max = e.getValue();
+                        final Double countryOngoing = e.getValue();
 
                         int delay = 0;
                         DoubleColumn italyOngoing = italy.doubleColumn("Ongoing");
                         DateColumn italyLastUpdate = italy.dateColumn("Last Update");
                         LocalDate italyMatchDate = italyLastUpdate.get(0);
 
+                        //previous ongoing value for Italy matching
+                        double prevItOngoing = -1;
+                        LocalDate prevItOngoingDate = null;
+
                         while (delay < italy.rowCount()) {
                             double itOngoing = italyOngoing.getDouble(delay);
                             italyMatchDate = italyLastUpdate.get(delay);
-                            if (itOngoing <= max) {
+                            if (itOngoing <= countryOngoing) {
+                                if (prevItOngoingDate != null) {
+                                    // itOngoing <= countryOngoing < prevItOngoing
+                                    double itDistance = prevItOngoing - itOngoing;
+                                    double currentItDistance = countryOngoing - itOngoing;
+                                    //are we closer to the previous date?
+                                    if (currentItDistance / itDistance > 0.8) {
+                                        delay--;
+                                        italyMatchDate = prevItOngoingDate;
+                                    }
+                                }
                                 break;
                             }
+                            prevItOngoing = itOngoing;
+                            prevItOngoingDate = italyMatchDate;
                             delay++;
                         }
 
