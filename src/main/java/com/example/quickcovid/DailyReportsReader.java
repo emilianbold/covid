@@ -193,6 +193,7 @@ public class DailyReportsReader {
                         Table t = new CsvReader().read(new Source(f));
 
                         if (t.columnNames().contains("FIPS")) {
+
                             //new format:
                             //-Province/State,Country/Region,Last Update,Confirmed,Deaths,Recovered,Latitude,Longitude
                             //+FIPS,Admin2,Province_State,Country_Region,Last_Update,Lat,Long_,Confirmed,Deaths,Recovered,Active,Combined_Key
@@ -201,13 +202,33 @@ public class DailyReportsReader {
                             /* t.replaceColumn("Last_Update",*/ t.column("Last_Update").setName("Last Update");
                             /* t.replaceColumn("Lat",*/ t.column("Lat").setName("Latitude");
                             /* t.replaceColumn("Long_",*/ t.column("Long_").setName("Longitude");
+
+                            //aggregate the data in 'Admin2', which is used only by US
+                            t = t.summarize("Confirmed", "Deaths", "Recovered", AggregateFunctions.sum)
+                                    .by("Country/Region", "Last Update", "Province/State");
+
+                            {
+                                IntColumn confirmed = t.doubleColumn("Sum [Confirmed]")
+                                        .map(Double::intValue, n -> IntColumn.create("Confirmed"));
+                                t.replaceColumn("Sum [Confirmed]", confirmed);
+                            }
+                            {
+                                IntColumn Deaths = t.doubleColumn("Sum [Deaths]")
+                                        .map(Double::intValue, n -> IntColumn.create("Deaths"));
+                                t.replaceColumn("Sum [Deaths]", Deaths);
+                            }
+                            {
+                                IntColumn Recovered = t.doubleColumn("Sum [Recovered]")
+                                        .map(Double::intValue, n -> IntColumn.create("Recovered"));
+                                t.replaceColumn("Sum [Recovered]", Recovered);
+                            }
                         }
 
                         if (t.column("Last Update").type() != ColumnType.LOCAL_DATE_TIME) {
                             Logger.getLogger(MainPage.class.getName()).log(Level.WARNING, "Bad timestamp for " + f);
                             return null;
                         } else {
-                           //remove time from date time
+                            //remove time from date time
                             DateTimeColumn update = t.dateTimeColumn("Last Update");
                             DateColumn date = update.map(d -> d.toLocalDate(), DateColumn::create);
                             t.replaceColumn("Last Update", date);
