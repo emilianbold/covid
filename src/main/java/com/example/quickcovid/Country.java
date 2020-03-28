@@ -7,7 +7,7 @@ public class Country {
         if ("Mainland China".equals(name) || "China".equals(name)) {
             return "China";
         }
-        if ("Others".equals(name) || "Cruise Ship".equals(name)) {
+        if ("Others".equals(name) || "Cruise Ship".equals(name) || "Diamond Princess".equals(name)) {
             return "Cruise Ship";
         }
         if ("Japan".equals(name)) {

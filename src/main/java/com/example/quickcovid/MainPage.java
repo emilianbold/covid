@@ -201,6 +201,9 @@ public class MainPage extends HtmlPageBootstrap {
                     .columnsForViewRows("Ongoing")
                     .columnForColor("Continent");
 
+//            chartBuilder.getConfigBuilder()
+//                    .displayModeBar(true);
+//
 //            chartBuilder.getLayoutBuilder()
 //                    .autosize(true)
 //                    .height(500);
