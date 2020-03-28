@@ -1,5 +1,8 @@
 package com.example.quickcovid;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class Country {
 
     public static String continentOf(String name) {
@@ -14,31 +17,252 @@ public class Country {
             return "Japan";
         }
 
-        //ugly way to encode all the countries
-        String europe = "/Kosovo/Jersey/Montenegro/Guernsey/Channel Islands/Holy See/Republic of Moldova/Cyprus/Albania/Moldova/Bulgaria/Republic of Ireland/Malta/Serbia/Slovakia/Vatican City/Gibraltar/Faroe Islands/Bosnia and Herzegovina/Liechtenstein/Portugal/Poland/Slovenia/Hungary/Ukraine/Andorra/Latvia/San Marino/North Ireland/Lithuania/Belarus/Iceland/Czech Republic/Czechia/Netherlands/Italy/France/Germany/Spain/UK/United Kingdom/Denmark/Finland/Ireland/Estonia/Monaco/Luxembourg/Croatia/Greece/Romania/Switzerland/Austria/Sweden/Belgium/North Macedonia/Norway/";
-        if (europe.contains("/" + name + "/")) {
+        List<String> europe = Arrays.asList(
+                "Albania",
+                "Andorra",
+                "Austria",
+                "Belarus",
+                "Belgium",
+                "Bosnia and Herzegovina",
+                "Bulgaria",
+                "Channel Islands",
+                "Croatia",
+                "Cyprus",
+                "Czech Republic",
+                "Czechia",
+                "Denmark",
+                "Estonia",
+                "Faroe Islands",
+                "Finland",
+                "France",
+                "Germany",
+                "Gibraltar",
+                "Greece",
+                "Guernsey",
+                "Holy See",
+                "Hungary",
+                "Iceland",
+                "Ireland",
+                "Italy",
+                "Jersey",
+                "Kosovo",
+                "Latvia",
+                "Liechtenstein",
+                "Lithuania",
+                "Luxembourg",
+                "Malta",
+                "Moldova",
+                "Monaco",
+                "Montenegro",
+                "Netherlands",
+                "North Ireland",
+                "North Macedonia",
+                "Norway",
+                "Poland",
+                "Portugal",
+                "Republic of Ireland",
+                "Republic of Moldova",
+                "Romania",
+                "San Marino",
+                "Serbia",
+                "Slovakia",
+                "Slovenia",
+                "Spain",
+                "Sweden",
+                "Switzerland",
+                "UK",
+                "Ukraine",
+                "United Kingdom",
+                "Vatican City");
+        if (europe.contains(name)) {
             return "Europe";
         }
-        String nAmerica = "/US/Canada/Mexico/Greenland/Nicaragua/Bahamas/The Bahamas/Bahamas, The/Saint Vincent and the Grenadines/Barbados/Belize/Dominica/El Salvador/Dominican Republic/Saint Barthelemy/Costa Rica/Grenada/Haiti/Martinique/St. Martin/Saint Martin/Panama/Honduras/Jamaica/Cayman Islands/Guadeloupe/Guatemala/Trinidad and Tobago/Puerto Rico/Aruba/Cuba/Saint Lucia/Antigua and Barbuda/Curacao/";
-        if (nAmerica.contains("/" + name + "/")) {
+
+        List<String> nAmerica = Arrays.asList(
+                "",
+                "Antigua and Barbuda",
+                "Aruba",
+                "Bahamas",
+                "Bahamas, The",
+                "Barbados",
+                "Belize",
+                "Canada",
+                "Cayman Islands",
+                "Costa Rica",
+                "Cuba",
+                "Curacao",
+                "Dominica",
+                "Dominican Republic",
+                "El Salvador",
+                "Greenland",
+                "Grenada",
+                "Guadeloupe",
+                "Guatemala",
+                "Haiti",
+                "Honduras",
+                "Jamaica",
+                "Martinique",
+                "Mexico",
+                "Nicaragua",
+                "Panama",
+                "Puerto Rico",
+                "Saint Barthelemy",
+                "Saint Lucia",
+                "Saint Martin",
+                "Saint Vincent and the Grenadines",
+                "St. Martin",
+                "The Bahamas",
+                "Trinidad and Tobago",
+                "US");
+        if (nAmerica.contains(name)) {
             return "North America";
         }
-        String sAmerica = "/Suriname/Fench Guiana/Venezuela/Uruguay/Bolivia/Paraguay/Peru/Chile/Argentina/Brazil/Ecuador/Colombia/French Guiana/Guyana/";
-        if (sAmerica.contains("/" + name + "/")) {
+
+        List<String> sAmerica = Arrays.asList(
+                "Argentina",
+                "Bolivia",
+                "Brazil",
+                "Chile",
+                "Colombia",
+                "Ecuador",
+                "Fench Guiana",
+                "French Guiana",
+                "Guyana",
+                "Paraguay",
+                "Peru",
+                "Suriname",
+                "Uruguay",
+                "Venezuela");
+        if (sAmerica.contains(name)) {
             return "South America";
         }
-        String asia = "/East Timor/Timor-Leste/Uzbekistan/Syria/Kyrgyzstan/Laos/Kazakhstan/Turkey/occupied Palestinian territory/Macao SAR/Russian Federation/Viet Nam/Taipei and environs/Hong Kong SAR/Republic of Korea/Korea, South/Korea  South/Iran (Islamic Republic of)/Mongolia/Brunei/Bangladesh/Maldives/Bhutan/Palestine/Jordan/Indonesia/Armenia/Saudi Arabia/Qatar/Georgia/Azerbaijan/Macau/Sri Lanka/Kuwait/Nepal/Cambodia/South Korea/Singapore/Hong Kong/Iran/Iraq/Thailand/Bahrain/Taiwan/Taiwan*/Kuwait/Malaysia/Vietnam/United Arab Emirates/Oman/India/Philippines/Israel/Lebanon/Pakistan/Russia/Afghanistan/";
-        if (asia.contains("/" + name + "/")) {
+
+        List<String> asia = Arrays.asList(
+                "Afghanistan",
+                "Armenia",
+                "Azerbaijan",
+                "Bahrain",
+                "Bangladesh",
+                "Bhutan",
+                "Brunei",
+                "Cambodia",
+                "East Timor",
+                "Georgia",
+                "Hong Kong SAR",
+                "Hong Kong",
+                "India",
+                "Indonesia",
+                "Iran (Islamic Republic of)",
+                "Iran",
+                "Iraq",
+                "Israel",
+                "Jordan",
+                "Kazakhstan",
+                "Korea  South",
+                "Korea, South",
+                "Kuwait",
+                "Kuwait",
+                "Kyrgyzstan",
+                "Laos",
+                "Lebanon",
+                "Macao SAR",
+                "Macau",
+                "Malaysia",
+                "Maldives",
+                "Mongolia",
+                "Nepal",
+                "Oman",
+                "Pakistan",
+                "Palestine",
+                "Philippines",
+                "Qatar",
+                "Republic of Korea",
+                "Russia",
+                "Russian Federation",
+                "Saudi Arabia",
+                "Singapore",
+                "South Korea",
+                "Sri Lanka",
+                "Syria",
+                "Taipei and environs",
+                "Taiwan",
+                "Taiwan*",
+                "Thailand",
+                "Timor-Leste",
+                "Turkey",
+                "United Arab Emirates",
+                "Uzbekistan",
+                "Viet Nam",
+                "Vietnam",
+                "occupied Palestinian territory");
+        if (asia.contains(name)) {
             return "Asia";
         }
 
-        String africa = "/Cape Verde/Mayotte/Republic of the Congo/The Gambia/Gambia, The/Cabo Verde/Angola/Zambia/Zimbabwe/Uganda/Tanzania/Seychelles/Somalia/Liberia/Libya/Madagascar/Mauritius/Mozambique/Niger/Angola/Benin/Central African Republic/Chad/Congo (Brazzaville)/Djibouti/Equatorial Guinea/Eritrea/Eswatini/Gambia/Rwanda/Ethiopia/Gabon/Mauritania/Kenya/Guinea/Namibia/Ghana/Sudan/Reunion/Cote d'Ivoire/Congo (Kinshasa)/Burkina Faso/Togo/Cameroon/South Africa/Tunisia/Senegal/Morocco/Algeria/Egypt/Nigeria/Ivory Coast/";
-        if (africa.contains("/" + name + "/")) {
+        List<String> africa = Arrays.asList(
+                "Algeria",
+                "Angola",
+                "Angola",
+                "Benin",
+                "Burkina Faso",
+                "Cabo Verde",
+                "Cameroon",
+                "Cape Verde",
+                "Central African Republic",
+                "Chad",
+                "Congo (Brazzaville)",
+                "Congo (Kinshasa)",
+                "Cote d'Ivoire",
+                "Djibouti",
+                "Egypt",
+                "Equatorial Guinea",
+                "Eritrea",
+                "Eswatini",
+                "Ethiopia",
+                "Gabon",
+                "Gambia",
+                "Gambia, The",
+                "Ghana",
+                "Guinea",
+                "Ivory Coast",
+                "Kenya",
+                "Liberia",
+                "Libya",
+                "Madagascar",
+                "Mauritania",
+                "Mauritius",
+                "Mayotte",
+                "Morocco",
+                "Mozambique",
+                "Namibia",
+                "Niger",
+                "Nigeria",
+                "Republic of the Congo",
+                "Reunion",
+                "Rwanda",
+                "Senegal",
+                "Seychelles",
+                "Somalia",
+                "South Africa",
+                "Sudan",
+                "Tanzania",
+                "The Gambia",
+                "Togo",
+                "Tunisia",
+                "Uganda",
+                "Zambia",
+                "Zimbabwe");
+        if (africa.contains(name)) {
             return "Africa";
         }
 
-        String oceania = "/Australia/New Zealand/Fiji/Papua New Guinea/Guam/";
-        if (oceania.contains("/" + name + "/")) {
+        List<String> oceania = Arrays.asList(
+                "Australia",
+                "Fiji",
+                "Guam",
+                "New Zealand",
+                "Papua New Guinea");
+        if (oceania.contains(name)) {
             return "Australia/Oceania";
         }
 
