@@ -19,9 +19,11 @@ import quicksilver.webapp.simpleui.bootstrap4.components.BSPanel;
 import tech.tablesaw.aggregate.AggregateFunctions;
 import tech.tablesaw.api.DateColumn;
 import tech.tablesaw.api.DoubleColumn;
+import tech.tablesaw.api.IntColumn;
 import tech.tablesaw.api.Row;
 import tech.tablesaw.api.Table;
 import tech.tablesaw.charts.ChartBuilder;
+import tech.tablesaw.plotly.components.Axis;
 
 public class MainPage extends HtmlPageBootstrap {
 
@@ -135,6 +137,8 @@ public class MainPage extends HtmlPageBootstrap {
         allData = DailyReportsReader.allData(true);
         //remove incomplete data on March 11th, 12th and 13th
         allData = allData.dropWhere(allData.dateColumn("Last Update").isBetweenIncluding(LocalDate.of(2020, 3, 11), LocalDate.of(2020, 3, 15)));
+        //remove incomplete data on Feb 1st
+        allData = allData.dropWhere(allData.dateColumn("Last Update").isBetweenIncluding(LocalDate.of(2020, 2, 1), LocalDate.of(2020, 2, 1)));
 
         allData = allData.summarize("Ongoing", "Confirmed", AggregateFunctions.sum)
                 .by("Country/Region", "Last Update", "Continent");
@@ -174,6 +178,38 @@ public class MainPage extends HtmlPageBootstrap {
                         }
                     }
                 });
+
+        {
+            allData = allData.sortAscendingOn("Continent", "Last Update");
+            DoubleColumn changeColumn = DoubleColumn.create("Change");
+
+            Double prevOngoing = null;
+            String prevContinent = null;
+            LocalDate prevDate = null;
+            for (Row r : allData) {
+                if (prevContinent == null || !prevContinent.equals(r.getString("Continent"))) {
+                    prevContinent = r.getString("Continent");
+                    prevOngoing = r.getDouble("Ongoing");
+                    prevDate = r.getDate("Last Update");
+
+                    changeColumn.appendMissing();
+                } else {
+                    double o = r.getDouble("Ongoing");
+                    LocalDate today = r.getDate("Last Update");
+                    //if there's a gap, divide by the # of days to avoid spikes
+                    if (prevOngoing != 0) {
+                        changeColumn.append(Math.round(100 * (o - prevOngoing) / (ChronoUnit.DAYS.between(prevDate, today) * prevOngoing)));
+                    } else {
+                        changeColumn.appendMissing();
+                    }
+
+                    prevOngoing = o;
+                    prevDate = today;
+                }
+            }
+            allData.addColumns(changeColumn);
+        }
+
         //include estimated values for max ongoing
         maxOngoing = allData.doubleColumn("Ongoing").max();
     }
@@ -201,6 +237,8 @@ public class MainPage extends HtmlPageBootstrap {
                     .columnsForViewRows("Ongoing")
                     .columnForColor("Continent");
 
+//            chartBuilder.getLayoutBuilder().yAxis(Axis.builder().type(Axis.Type.LOG).build());
+
 //            chartBuilder.getConfigBuilder()
 //                    .displayModeBar(true);
 //
@@ -209,6 +247,18 @@ public class MainPage extends HtmlPageBootstrap {
 //                    .height(500);
             p.add(new BSCard(new TSFigurePanel(chartBuilder.divName("Ongoing").build(), "Ongoing"),
                     "Ongoing"));
+        }
+        {
+            ChartBuilder chartBuilder = ChartBuilder.createBuilder()
+                    .dataTable(allData)
+                    .chartType(ChartBuilder.CHART_TYPE.TIMESERIES)
+                    .axisTitles(null, "% change")
+                    .columnsForViewColumns("Last Update")
+                    .columnsForViewRows("Change")
+                    .columnForColor("Continent");
+
+            p.add(new BSCard(new TSFigurePanel(chartBuilder.divName("Change").build(), "Change"),
+                    "Change"));
         }
         {
             ChartBuilder chartBuilder = ChartBuilder.createBuilder()
