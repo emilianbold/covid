@@ -2,6 +2,7 @@ package com.example.quickcovid;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.DoubleFunction;
 import java.util.stream.Collectors;
@@ -322,9 +323,55 @@ public class MainPage extends HtmlPageBootstrap {
     }
 
     private static DoubleFunction<Double> trend(Table t, String columnName, String dateName) {
+        Map<Integer, Pair<Double, Double>> lines = new HashMap<>();
+
+        int x1 = t.rowCount() - 1;
+        {
+            Pair<Double, Double> trend1 = offsetSlope(t, columnName, dateName, 0);
+            lines.put(x1, trend1);
+        }
+
+        //XXX: This is wrong, as gaps might mean a different xStep... maybe offsetSlope should return xStep too.
+        int x2 = x1 - 1;
+        {
+            Pair<Double, Double> trend2 = offsetSlope(t, columnName, dateName, 1);
+            lines.put(x2, trend2);
+        }
+
+        return xD -> {
+            int x = (int) xD;
+
+            if (lines.containsKey(x)) {
+                Pair<Double, Double> trend = lines.get(x);
+                double slope = trend.getRight();
+                double offset = trend.getLeft();
+
+                return offset + slope * x;
+            } else {
+                Pair<Double, Double> trend1 = lines.get(x - 1);
+
+                double slope1 = trend1.getRight();
+                double offset1 = trend1.getLeft();
+
+                Pair<Double, Double> trend2 = lines.get(x - 2);
+                double slope2 = trend2.getRight();
+                double offset2 = trend2.getLeft();
+
+                double slope = slope1 * slope1 / slope2;
+                double offset = offset1 + x1 * (slope1 - slope);
+
+//                System.out.println(offset1 + " " + slope1 + " 2 : " + offset2 + " " + slope2);
+                lines.put(x, Pair.of(offset, slope));
+
+                return offset + slope * x;
+            }
+        };
+    }
+
+    private static Pair<Double, Double> offsetSlope(Table t, String columnName, String dateName, int pos) {
         DoubleColumn values = t.doubleColumn(columnName);
-        double y2 = values.get(0);
-        double x2 = values.size() - 1;
+        double y2 = values.get(pos);
+        double x2 = values.size() - 1 - pos;
 
         double y1;
 
@@ -335,10 +382,10 @@ public class MainPage extends HtmlPageBootstrap {
             y1 = 0;
             xStep = 1;
         } else {
-            y1 = values.get(1);
+            y1 = values.get(pos + 1);
             DateColumn dates = t.dateColumn(dateName);
-            LocalDate today = dates.get(0);
-            LocalDate prev = dates.get(1);
+            LocalDate today = dates.get(pos);
+            LocalDate prev = dates.get(pos + 1);
             xStep = (int) ChronoUnit.DAYS.between(prev, today);
         }
         double x1 = x2 - xStep;
@@ -347,6 +394,6 @@ public class MainPage extends HtmlPageBootstrap {
 
         double offset = y2 - (slope * x2);
 
-        return x -> offset + slope * x;
+        return Pair.of(offset, slope);
     }
 }
