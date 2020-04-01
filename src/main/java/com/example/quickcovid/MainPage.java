@@ -329,6 +329,10 @@ public class MainPage extends HtmlPageBootstrap {
         {
             Pair<Double, Double> trend1 = offsetSlope(t, columnName, dateName, 0);
             lines.put(x1, trend1);
+
+            if(t.rowCount() <= 2) {
+                return v -> trend1.getLeft() + trend1.getRight() * v;
+            }
         }
 
         //XXX: This is wrong, as gaps might mean a different xStep... maybe offsetSlope should return xStep too.
@@ -357,7 +361,16 @@ public class MainPage extends HtmlPageBootstrap {
                 double slope2 = trend2.getRight();
                 double offset2 = trend2.getLeft();
 
-                double slope = slope1 * slope1 / slope2;
+                double slopeChange = slope1 / slope2;
+
+                //don't degenerate the slope too much...
+                if (slopeChange > 1.1) {
+                    slopeChange = 1;
+                } else if (slopeChange < 0.9) {
+                    slopeChange = 0.9;
+                }
+
+                double slope = slope1 * slopeChange;
                 double offset = offset1 + x1 * (slope1 - slope);
 
 //                System.out.println(offset1 + " " + slope1 + " 2 : " + offset2 + " " + slope2);

@@ -10,7 +10,8 @@ public class Country {
         if ("Mainland China".equals(name) || "China".equals(name)) {
             return "China";
         }
-        if ("Others".equals(name) || "Cruise Ship".equals(name) || "Diamond Princess".equals(name)) {
+        if ("Others".equals(name) || "Cruise Ship".equals(name) || "Diamond Princess".equals(name)
+                || "MS Zaandam".equals(name)) {
             return "Cruise Ship";
         }
         if ("Japan".equals(name)) {
@@ -24,6 +25,7 @@ public class Country {
                 "Belarus",
                 "Belgium",
                 "Bosnia and Herzegovina",
+                "Botswana",
                 "Bulgaria",
                 "Channel Islands",
                 "Croatia",
@@ -79,7 +81,6 @@ public class Country {
         }
 
         List<String> nAmerica = Arrays.asList(
-                "",
                 "Antigua and Barbuda",
                 "Aruba",
                 "Bahamas",
@@ -196,6 +197,7 @@ public class Country {
                 "Uzbekistan",
                 "Viet Nam",
                 "Vietnam",
+                "West Bank and Gaza",
                 "occupied Palestinian territory");
         if (asia.contains(name)) {
             return "Asia";
