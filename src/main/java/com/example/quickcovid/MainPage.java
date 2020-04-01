@@ -20,11 +20,9 @@ import quicksilver.webapp.simpleui.bootstrap4.components.BSPanel;
 import tech.tablesaw.aggregate.AggregateFunctions;
 import tech.tablesaw.api.DateColumn;
 import tech.tablesaw.api.DoubleColumn;
-import tech.tablesaw.api.IntColumn;
 import tech.tablesaw.api.Row;
 import tech.tablesaw.api.Table;
 import tech.tablesaw.charts.ChartBuilder;
-import tech.tablesaw.plotly.components.Axis;
 
 public class MainPage extends HtmlPageBootstrap {
 
@@ -216,6 +214,19 @@ public class MainPage extends HtmlPageBootstrap {
     }
 
     @Override
+    public void renderHEAD(HtmlStream stream) {
+        super.renderHEAD(stream);
+        LocalDate today = LocalDate.now();
+
+        stream.writeln("<meta name=\"twitter:card\" content=\"summary\" />\n"
+                + "<meta name=\"twitter:creator\" content=\"@emilianbold\" />\n"
+                + "<meta property=\"og:url\" content=\"http://covid.410go.net\" />\n"
+                + "<meta property=\"og:title\"  content=\"COVID19 Charts\"/>\n"
+                + "<meta property=\"og:description\" content=\"Active cases with prediction, change, days behind Italy and total confirmed charts.\"/ />\n"
+                + "<meta property=\"og:image\" content=\"http://covid.410go.net/ongoing-" + today.toString() + ".png\" />");
+    }
+
+    @Override
     protected BSNavbar createNavbar() {
         BSNavbar bar = super.createNavbar();
 
@@ -240,8 +251,8 @@ public class MainPage extends HtmlPageBootstrap {
 
 //            chartBuilder.getLayoutBuilder().yAxis(Axis.builder().type(Axis.Type.LOG).build());
 
-//            chartBuilder.getConfigBuilder()
-//                    .displayModeBar(true);
+            chartBuilder.getConfigBuilder()
+                    .displayModeBar(true);
 //
 //            chartBuilder.getLayoutBuilder()
 //                    .autosize(true)
