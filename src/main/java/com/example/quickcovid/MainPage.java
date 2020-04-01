@@ -218,12 +218,12 @@ public class MainPage extends HtmlPageBootstrap {
         super.renderHEAD(stream);
         LocalDate today = LocalDate.now();
 
-        stream.writeln("<meta name=\"twitter:card\" content=\"summary\" />\n"
+        stream.writeln("<meta name=\"twitter:card\" content=\"summary_large_image\" />\n"
                 + "<meta name=\"twitter:creator\" content=\"@emilianbold\" />\n"
                 + "<meta property=\"og:url\" content=\"http://covid.410go.net\" />\n"
-                + "<meta property=\"og:title\"  content=\"COVID19 Charts\"/>\n"
-                + "<meta property=\"og:description\" content=\"Active cases with prediction, change, days behind Italy and total confirmed charts.\"/ />\n"
-                + "<meta property=\"og:image\" content=\"http://covid.410go.net/ongoing-" + today.toString() + ".png\" />");
+                + "<meta name=\"twitter:title\"  content=\"COVID19 Charts\"/>\n"
+                + "<meta name=\"twitter:description\" content=\"Active cases with prediction, change, days behind Italy and total confirmed charts.\"/ />\n"
+                + "<meta name=\"twitter:image\" content=\"http://covid.410go.net/ongoing-" + today.toString() + ".png\" />");
     }
 
     @Override
