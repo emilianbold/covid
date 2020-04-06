@@ -1,4 +1,4 @@
-package com.example.quickcovid;
+package net._410go.covid;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;

@@ -1,4 +1,4 @@
-package com.example.quickcovid;
+package net._410go.covid;
 
 import quicksilver.commons.app.SimpleApplication;
 import quicksilver.commons.app.SimpleWebServer;

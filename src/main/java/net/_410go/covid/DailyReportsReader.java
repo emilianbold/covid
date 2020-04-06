@@ -1,4 +1,4 @@
-package com.example.quickcovid;
+package net._410go.covid;
 
 import java.io.File;
 import java.io.IOException;

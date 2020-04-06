@@ -1,4 +1,4 @@
-package com.example.quickcovid;
+package net._410go.covid;
 
 import java.util.Arrays;
 import java.util.List;
