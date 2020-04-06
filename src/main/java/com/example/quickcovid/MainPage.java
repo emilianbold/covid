@@ -253,10 +253,10 @@ public class MainPage extends HtmlPageBootstrap {
 
             chartBuilder.getConfigBuilder()
                     .displayModeBar(true);
-//
-//            chartBuilder.getLayoutBuilder()
-//                    .autosize(true)
-//                    .height(500);
+
+            chartBuilder.getLayoutBuilder()
+                    .autosize(true);
+
             p.add(new BSCard(new TSFigurePanel(chartBuilder.divName("Ongoing").build(), "Ongoing"),
                     "Ongoing"));
         }
@@ -268,6 +268,9 @@ public class MainPage extends HtmlPageBootstrap {
                     .columnsForViewColumns("Last Update")
                     .columnsForViewRows("Change")
                     .columnForColor("Continent");
+
+            chartBuilder.getLayoutBuilder()
+                    .autosize(true);
 
             p.add(new BSCard(new TSFigurePanel(chartBuilder.divName("Change").build(), "Change"),
                     "Change"));
@@ -294,6 +297,9 @@ public class MainPage extends HtmlPageBootstrap {
                     .columnsForViewColumns("Last Update")
                     .columnsForViewRows("Confirmed")
                     .columnForColor("Continent");
+
+            chartBuilder2.getLayoutBuilder()
+                    .autosize(true);
 
             p.add(new BSCard(new TSFigurePanel(chartBuilder2.divName("Confirmed").build(), "Confirmed"),
                     "Confirmed"));
