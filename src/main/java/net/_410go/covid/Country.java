@@ -198,6 +198,7 @@ public class Country {
                 "Viet Nam",
                 "Vietnam",
                 "West Bank and Gaza",
+                "Yemen",
                 "occupied Palestinian territory");
         if (asia.contains(name)) {
             return "Asia";
