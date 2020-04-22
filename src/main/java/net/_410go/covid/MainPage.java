@@ -53,11 +53,12 @@ public class MainPage extends HtmlPageBootstrap {
             //for each country find the latest number, match it with a previous date on Italy,
             //shift the date and change the country (aka legend label) name
 
-            //1. for each country find the latest number
+            //1. for each country find the latest number (*not* necessarily the max number as ongoing could be *decreasing*)
             Map<String, Double> maxCountry = europeData.splitOn("Country/Region").asTableList().stream()
+                    .map(t -> t.sortDescendingOn("Last Update"))
                     .map(t -> Pair.of(
                     t.getString(0, "Country/Region"),
-                    t.doubleColumn("Ongoing").max()))
+                    t.doubleColumn("Ongoing").getDouble(0)))
                     .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
             Map<String, LocalDate> latestCountry = europeData.splitOn("Country/Region").asTableList().stream()
                     .map(t -> Pair.of(
@@ -70,7 +71,7 @@ public class MainPage extends HtmlPageBootstrap {
             final Table italy = europeData.splitOn("Country/Region").asTableList().stream()
                     .filter(t -> t.getString(0, "Country/Region").equals("Italy"))
                     .findAny().get()
-                    .sortDescendingOn("Ongoing");
+                    .sortDescendingOn("Last Update");
 
             //2.match it with a previous date on Italy
             Map<String, LocalDate> delayCountry = maxCountry.entrySet().stream()
@@ -81,7 +82,7 @@ public class MainPage extends HtmlPageBootstrap {
                         int delay = 0;
                         DoubleColumn italyOngoing = italy.doubleColumn("Ongoing");
                         DateColumn italyLastUpdate = italy.dateColumn("Last Update");
-                        LocalDate italyMatchDate = italyLastUpdate.get(0);
+                        LocalDate italyMatchDate = null;
 
                         //previous ongoing value for Italy matching
                         double prevItOngoing = -1;
