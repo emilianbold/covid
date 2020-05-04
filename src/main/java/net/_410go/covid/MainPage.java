@@ -33,6 +33,8 @@ public class MainPage extends HtmlPageBootstrap {
 
     public MainPage() {
         europeData = DailyReportsReader.allData();
+        //remove incomplete data on Apr 23rd
+        europeData = europeData.dropWhere(europeData.dateColumn("Last Update").isBetweenIncluding(LocalDate.of(2020, 4, 23), LocalDate.of(2020, 4, 23)));
         europeData = europeData.splitOn("Continent").asTableList().stream()
                 .filter(t -> t.getString(0, "Continent").equals("Europe") || t.getString(0, "Continent").equals("North America"))
                 .reduce(Table::append)
@@ -113,11 +115,11 @@ public class MainPage extends HtmlPageBootstrap {
                     })
                     .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
 
-            //remove countries more than 14 days away to make the chart more readable
+            //remove countries more than 21 days away to make the chart more readable
             europeData = europeData.splitOn("Country/Region").asTableList().stream()
                     .filter(t -> {
                         String country = t.getString(0, "Country/Region");
-                        return country.equals("Romania") || ChronoUnit.DAYS.between(delayCountry.get(country), latestItaly)  <= 14;
+                        return country.equals("Romania") || ChronoUnit.DAYS.between(delayCountry.get(country), latestItaly)  <= 21;
                     })
                     .reduce(Table::append)
                     .get();
@@ -139,6 +141,8 @@ public class MainPage extends HtmlPageBootstrap {
         allData = allData.dropWhere(allData.dateColumn("Last Update").isBetweenIncluding(LocalDate.of(2020, 3, 11), LocalDate.of(2020, 3, 15)));
         //remove incomplete data on Feb 1st
         allData = allData.dropWhere(allData.dateColumn("Last Update").isBetweenIncluding(LocalDate.of(2020, 2, 1), LocalDate.of(2020, 2, 1)));
+        //remove incomplete data on Apr 23rd
+        allData = allData.dropWhere(allData.dateColumn("Last Update").isBetweenIncluding(LocalDate.of(2020, 4, 23), LocalDate.of(2020, 4, 23)));
 
         allData = allData.summarize("Ongoing", "Confirmed", AggregateFunctions.sum)
                 .by("Country/Region", "Last Update", "Continent");
